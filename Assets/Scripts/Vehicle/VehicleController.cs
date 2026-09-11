@@ -146,40 +146,37 @@ public class VehicleController : MonoBehaviour
 
     /// <summary>
     /// [차량 섀시 3D 피팅 알고리즘]
-    /// 런타임 JSON 핫스왑 시 로드된 윤거(currentTrackW)와 축거(currentWheelbase) 수치에 비례하여
+    /// 런타임 JSON 핫스왑 시 로드된 윤거(currentTrackW)와 축거(currentWheelbase) 수치에 맞춰
     /// 3D 섀시 메쉬의 로컬 위치(오프셋) 및 스케일을 정밀하게 자동 변환한다.
     ///
-    /// [원리 수식]:
-    /// - Scale_X = defaultScale.x * (currentTrackW / baseTrackWidth)
-    /// - Scale_Y = defaultScale.y (서스펜션 차고 높이 유지)
-    /// - Scale_Z = defaultScale.z * (currentWheelbase / baseWheelbase)
-    /// - Pos_Z   = defaultPos.z   * (currentWheelbase / baseWheelbase) (휠하우스 중심점 보정)
+    /// [실측 캘리브레이션 기반 수식 유도]:
+    /// 1. 윤거(Track Width): 순정 섀시 폭(1.628m) 기준 비례 확대
+    ///    - Scale_X = currentTrackW / 1.628f (Default 1.6m -> 0.983, Sporty 1.72m -> 1.0565)
+    /// 2. 축거(Wheelbase): Default(3.0m -> 1.050) 및 Sporty(2.76m -> 0.975) 2개 실측 포인트를 100% 관통하는 1차 선형식
+    ///    - 기울기 a = (1.050 - 0.975) / (3.00 - 2.76) = 0.3125f
+    ///    - 절편   b = 1.050 - (0.3125 * 3.00) = 0.1125f
+    ///    - Scale_Z = (0.3125f * currentWheelbase) + 0.1125f
+    /// 3. 위치 오프셋: Y=0.15 고정 (서스펜션 차고), Z는 축거 비율에 따른 휠하우스 센터 미세 보정
+    ///    - Pos_Z = -0.05f * (currentWheelbase / 3.0f)
     /// </summary>
     public void ApplyChassisScale(float currentTrackW, float currentWheelbase)
     {
         CachePureOriginalTransform();
         if (chassisVisualTransform == null) return;
-        if (baseTrackWidth <= 0 || baseWheelbase <= 0) return;
+        if (currentTrackW <= 0 || currentWheelbase <= 0) return;
 
-        // 윤거 및 축거 변화 비율 계산
-        float scaleXRatio = currentTrackW / baseTrackWidth;
-        float scaleZRatio = currentWheelbase / baseWheelbase;
+        // 1. 윤거(Track Width)에 따른 폭 스케일 (순정 섀시 폭 1.628m 기준)
+        float scaleX = (currentTrackW / 1.628f);
 
-        // 1. 3D 차체 스케일 인가 (기본 검증 스케일 Vector3(1.0, 1.0, 1.05) 기준 비례 확대/축소)
-        Vector3 autoCalculatedScale = new Vector3(
-            defaultChassisLocalScale.x * scaleXRatio,
-            defaultChassisLocalScale.y,
-            defaultChassisLocalScale.z * scaleZRatio
-        );
-        chassisVisualTransform.localScale = autoCalculatedScale;
+        // 2. 축거(Wheelbase)에 따른 전장 스케일 (Default 3.0m=1.050, Sporty 2.76m=0.975 정밀 선형 회귀)
+        float scaleZ = (0.3125f * currentWheelbase) + 0.1125f;
 
-        // 2. 3D 차체 로컬 위치 오프셋 인가 (기본 검증 위치 Vector3(0, 0.15, -0.05) 기준 휠하우스 센터 보정)
-        Vector3 autoCalculatedPos = new Vector3(
-            defaultChassisLocalPos.x * scaleXRatio,
-            defaultChassisLocalPos.y,
-            defaultChassisLocalPos.z * scaleZRatio
-        );
-        chassisVisualTransform.localPosition = autoCalculatedPos;
+        // 3. 차체 3D 스케일 인가
+        chassisVisualTransform.localScale = new Vector3(scaleX, 1.0f, scaleZ);
+
+        // 4. 휠하우스 센터 오프셋 위치 인가 (Y=0.15 고정, Z는 축거 비례 미세 보정)
+        float posZ = -0.05f * (currentWheelbase / 3.0f);
+        chassisVisualTransform.localPosition = new Vector3(0.0f, 0.15f, posZ);
     }
 
     private void FixedUpdate()
