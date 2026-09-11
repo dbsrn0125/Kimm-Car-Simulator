@@ -165,16 +165,16 @@ public class VehicleController : MonoBehaviour
         if (chassisVisualTransform == null) return;
         if (currentTrackW <= 0 || currentWheelbase <= 0) return;
 
-        // 1. 윤거(Track Width)에 따른 폭 스케일 (순정 섀시 폭 1.628m 기준)
-        float scaleX = (currentTrackW / 1.628f);
+        // 1. 윤거(Track Width)에 따른 폭 스케일 (Default Config 윤거 1.600m 기준 -> Scale_X = 1.000)
+        float scaleX = (currentTrackW / 1.600f);
 
-        // 2. 축거(Wheelbase)에 따른 전장 스케일 (Default 3.0m=1.050, Sporty 2.76m=0.975 정밀 선형 회귀)
+        // 2. 축거(Wheelbase)에 따른 전장 스케일 (Default 3.0m -> 1.050, Sporty 2.76m -> 0.975 정밀 선형 회귀)
         float scaleZ = (0.3125f * currentWheelbase) + 0.1125f;
 
-        // 3. 차체 3D 스케일 인가
+        // 3. 차체 3D 스케일 인가 (Default 기준: Vector3(1.0, 1.0, 1.05))
         chassisVisualTransform.localScale = new Vector3(scaleX, 1.0f, scaleZ);
 
-        // 4. 휠하우스 센터 오프셋 위치 인가 (Y=0.15 고정, Z는 축거 비례 미세 보정)
+        // 4. 휠하우스 센터 오프셋 위치 인가 (Default 기준: Vector3(0.0, 0.15, -0.05))
         float posZ = -0.05f * (currentWheelbase / 3.0f);
         chassisVisualTransform.localPosition = new Vector3(0.0f, 0.15f, posZ);
     }
