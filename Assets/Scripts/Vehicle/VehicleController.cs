@@ -70,8 +70,8 @@ public class VehicleController : MonoBehaviour
         CachePureOriginalTransform();
         AttachSpoilerToChassis();
 
-        // 초기 시작 시 기본 최적 피팅 적용
-        ApplyChassisScale(baseTrackWidth, baseWheelbase);
+        // 초기 시작 시 기본 최적 피팅 적용 (Default 기준 1.6m, 3.0m 명시적 인가)
+        ApplyChassisScale(1.600f, 3.000f);
 
         if (spawnPoint != null)
         {
@@ -149,33 +149,44 @@ public class VehicleController : MonoBehaviour
     /// 런타임 JSON 핫스왑 시 로드된 윤거(currentTrackW)와 축거(currentWheelbase) 수치에 맞춰
     /// 3D 섀시 메쉬의 로컬 위치(오프셋) 및 스케일을 정밀하게 자동 변환한다.
     ///
-    /// [실측 캘리브레이션 기반 수식 유도]:
-    /// 1. 윤거(Track Width): 순정 섀시 폭(1.628m) 기준 비례 확대
-    ///    - Scale_X = currentTrackW / 1.628f (Default 1.6m -> 0.983, Sporty 1.72m -> 1.0565)
-    /// 2. 축거(Wheelbase): Default(3.0m -> 1.050) 및 Sporty(2.76m -> 0.975) 2개 실측 포인트를 100% 관통하는 1차 선형식
-    ///    - 기울기 a = (1.050 - 0.975) / (3.00 - 2.76) = 0.3125f
-    ///    - 절편   b = 1.050 - (0.3125 * 3.00) = 0.1125f
-    ///    - Scale_Z = (0.3125f * currentWheelbase) + 0.1125f
-    /// 3. 위치 오프셋: Y=0.15 고정 (서스펜션 차고), Z는 축거 비율에 따른 휠하우스 센터 미세 보정
-    ///    - Pos_Z = -0.05f * (currentWheelbase / 3.0f)
+    /// [Default 절대 기준 (TrackW: 1.60m, Wheelbase: 3.00m)]:
+    /// - Scale: Vector3(1.0f, 1.0f, 1.05f)
+    /// - Position: Vector3(0.0f, 0.15f, -0.05f)
+    ///
+    /// [Sporty 절대 기준 (TrackW: 1.72m, Wheelbase: 2.76m)]:
+    /// - Scale: Vector3(1.075f, 1.0f, 0.975f)
+    /// - Position: Vector3(0.0f, 0.15f, -0.046f)
     /// </summary>
     public void ApplyChassisScale(float currentTrackW, float currentWheelbase)
     {
         CachePureOriginalTransform();
         if (chassisVisualTransform == null) return;
-        if (currentTrackW <= 0 || currentWheelbase <= 0) return;
 
-        // 1. 윤거(Track Width)에 따른 폭 스케일 (Default Config 윤거 1.600m 기준 -> Scale_X = 1.000)
+        // Default Config 근사값(TrackW: 1.6m, Wheelbase: 3.0m)일 경우 사용자 검증 절대값으로 100% 강제 고정!
+        if (Mathf.Approximately(currentTrackW, 1.600f) && Mathf.Approximately(currentWheelbase, 3.000f))
+        {
+            chassisVisualTransform.localScale = new Vector3(1.0f, 1.0f, 1.05f);
+            chassisVisualTransform.localPosition = new Vector3(0.0f, 0.15f, -0.05f);
+            return;
+        }
+
+        if (currentTrackW <= 0 || currentWheelbase <= 0)
+        {
+            currentTrackW = 1.600f;
+            currentWheelbase = 3.000f;
+        }
+
+        // 1. 윤거(Track Width)에 따른 폭 스케일 (Default 1.600m -> Scale_X = 1.000)
         float scaleX = (currentTrackW / 1.600f);
 
-        // 2. 축거(Wheelbase)에 따른 전장 스케일 (Default 3.0m -> 1.050, Sporty 2.76m -> 0.975 정밀 선형 회귀)
+        // 2. 축거(Wheelbase)에 따른 전장 스케일 (Default 3.0m -> 1.050, Sporty 2.76m -> 0.975 선형 보간)
         float scaleZ = (0.3125f * currentWheelbase) + 0.1125f;
 
-        // 3. 차체 3D 스케일 인가 (Default 기준: Vector3(1.0, 1.0, 1.05))
+        // 3. 차체 3D 스케일 인가
         chassisVisualTransform.localScale = new Vector3(scaleX, 1.0f, scaleZ);
 
         // 4. 휠하우스 센터 오프셋 위치 인가 (Default 기준: Vector3(0.0, 0.15, -0.05))
-        float posZ = -0.05f * (currentWheelbase / 3.0f);
+        float posZ = -0.05f * (currentWheelbase / 3.000f);
         chassisVisualTransform.localPosition = new Vector3(0.0f, 0.15f, posZ);
     }
 
