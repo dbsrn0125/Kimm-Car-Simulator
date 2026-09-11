@@ -653,7 +653,6 @@ MonoBehaviour:
   hitQx: 0
   hitQy: 0
   isGrounded: 0
-  enableDebugLog: 1
 --- !u!1 &47938711
 GameObject:
   m_ObjectHideFlags: 0
@@ -7995,7 +7994,6 @@ MonoBehaviour:
   hitQx: 0
   hitQy: 0
   isGrounded: 0
-  enableDebugLog: 1
 --- !u!1 &1021984418
 GameObject:
   m_ObjectHideFlags: 0
@@ -10938,7 +10936,6 @@ MonoBehaviour:
   hitQx: 0
   hitQy: 0
   isGrounded: 0
-  enableDebugLog: 1
 --- !u!4 &1326229849
 Transform:
   m_ObjectHideFlags: 0
@@ -13411,7 +13408,6 @@ MonoBehaviour:
   hitQx: 0
   hitQy: 0
   isGrounded: 0
-  enableDebugLog: 1
 --- !u!1 &1745928117
 GameObject:
   m_ObjectHideFlags: 0
@@ -17198,6 +17194,8 @@ MonoBehaviour:
   fmuManager: {fileID: 1815478317}
   inputManager: {fileID: 1815478316}
   chassisVisualTransform: {fileID: 0}
+  defaultChassisLocalPos: {x: 0, y: 0.15, z: -0.05}
+  defaultChassisLocalScale: {x: 1, y: 1, z: 1.05}
   baseTrackWidth: 1.628
   baseWheelbase: 2.8
   spawnPoint: {fileID: 0}

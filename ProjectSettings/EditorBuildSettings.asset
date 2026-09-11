@@ -9,9 +9,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Main.unity
     guid: 4d697248e02f98a48b7d927448d875e2
   - enabled: 1
-    path: Assets/Scenes/Proving Ground.unity
-    guid: a0fcbf7cf14aa534fb0fa193d6e7243d
-  - enabled: 1
     path: Assets/Scenes/K-City.unity
     guid: 41d195d18b87bc84d93d7b353410863d
   - enabled: 1
@@ -20,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Zalazone.unity
     guid: 330e60e6838ca304a809903cb4831994
+  - enabled: 1
+    path: Assets/Scenes/Proving Ground.unity
+    guid: a0fcbf7cf14aa534fb0fa193d6e7243d
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
