@@ -30,7 +30,7 @@
   - [6. 자율주행 경로 추종 제어 Python 예제 코드 (`pure_pursuit_demo.py`)](#6-자율주행-경로-추종-제어-python-예제-코드-pure_pursuit_demopy)
 - [조작 및 단축키 안내 (Controls Guide)](#-조작-및-단축키-안내-controls-guide)
 - [런타임 환경설정 (Configuration & Hot-Swap)](#-런타임-환경설정-configuration--hot-swap)
-  - [1. 차량 물리 파라미터 기본 설정 (`vehicle_config.json` - 45개 변수)](#1-차량-물리-파라미터-기본-설정-vehicle_configjson---45개-변수)
+  - [1. 차량 물리 파라미터 기본 설정 (`vehicle_config.json` - 42개 동역학 변수)](#1-차량-물리-파라미터-기본-설정-vehicle_configjson---42개-동역학-변수)
   - [2. 센서 스위트 기본 설정 (`default_sensor_config.json`)](#2-센서-스위트-기본-설정-default_sensor_configjson)
   - [3. 다중 센서 확장 설정 예시 (`custom_sensor_config.json`)](#3-다중-센서-확장-설정-예시-custom_sensor_configjson)
 - [지원 맵 및 트랙 (Supported Tracks)](#-지원-맵-및-트랙-supported-tracks)
@@ -45,7 +45,7 @@
 > 시뮬레이터 UI 가이드, 키보드/레이싱휠 조작법, 시나리오 편집 모드 등 상세 설명이 포함된 공식 매뉴얼 문서
 
 * **1000 Hz 다물체 동역학**: MATLAB Simscape Multibody 기반 14자유도(14-DOF) 모델과 Magic Formula 비선형 타이어 마찰 모델을 C++ FMU로 연동하여 1ms Co-Simulation을 수행한다.
-* **센서 및 파라미터 핫스왑**: 소스코드 재컴파일 없이 JSON 파일만으로 45개 차량 물리 변수와 복수 LiDAR/Camera/GNSS/IMU 구성을 실시간 교체한다.
+* **센서 및 파라미터 핫스왑**: 소스코드 재컴파일 없이 JSON 파일만으로 42개 차량 동역학 물리 변수와 복수 LiDAR/Camera/GNSS/IMU 구성을 실시간 교체한다.
 * **표준 ROS 2 인터페이스**: 실제 차량 By-Wire 제어 규격(`kimm_msgs/CarControlCmd`)을 통해 Ubuntu ROS 2 자율주행 풀스택(인지-판단-제어)과 1:1 직통 통신을 지원한다.
 
 ---
@@ -320,20 +320,16 @@ if __name__ == '__main__':
 
 설정 파일은 실행 파일 기준 `Kimm-Car-Simulator_Data/StreamingAssets/` 폴더에 위치하며, 소스코드 수정 없이 JSON 수정만으로 동작이 변경된다.
 
-### 1. 차량 물리 파라미터 기본 설정 (`vehicle_config.json` - 45개 변수)
+### 1. 차량 물리 파라미터 기본 설정 (`vehicle_config.json` - 42개 동역학 변수)
 
 ```json
 {
   "Metadata": {
     "VehicleName": "KIMM Standard Sedan (Original Baseline)",
-    "Description": "인스펙터 원본 데이터 기반 45개 정확한 baseline 파라미터 설정 파일",
+    "Description": "인스펙터 원본 데이터 기반 42개 정확한 baseline 파라미터 설정 파일",
     "Version": "1.0"
   },
   "Parameters": {
-    "gnssLatitude": 35.8714,
-    "gnssLongitude": 128.6014,
-    "gnssAltitude": 45.0,
-
     "Veh_AeroArea": 2.594,
     "Veh_AeroCd": 0.2888,
     "Veh_AeroCl": 0.149,

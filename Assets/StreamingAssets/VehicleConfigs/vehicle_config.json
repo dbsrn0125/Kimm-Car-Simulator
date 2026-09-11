@@ -1,14 +1,10 @@
 {
   "Metadata": {
     "VehicleName": "KIMM Standard Sedan (Original Baseline)",
-    "Description": "인스펙터 원본 데이터 기반 45개 정확한 baseline 파라미터 설정 파일",
+    "Description": "인스펙터 원본 데이터 기반 42개 정확한 baseline 파라미터 설정 파일",
     "Version": "1.0"
   },
   "Parameters": {
-    "gnssLatitude": 35.8714,
-    "gnssLongitude": 128.6014,
-    "gnssAltitude": 45.0,
-
     "Veh_AeroArea": 2.594,
     "Veh_AeroCd": 0.2888,
     "Veh_AeroCl": 0.149,
