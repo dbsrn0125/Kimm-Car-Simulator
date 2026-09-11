@@ -12,11 +12,17 @@ public class VehicleController : MonoBehaviour
     [Tooltip("3D 차량 섀시/차체 껍데기 Visual Mesh Transform")]
     public Transform chassisVisualTransform;
 
-    [Tooltip("Baseline 윤거 (m) - 3D 섀시 모델 순정 기준 바퀴 간격")]
-    public float baseTrackWidth = 1.628f;
+    [Tooltip("Default Config 기준 섀시 로컬 오프셋 위치 (X, Y, Z) - 사용자 최적 검증값: (0, 0.15, -0.05)")]
+    public Vector3 defaultChassisLocalPos = new Vector3(0.0f, 0.15f, -0.05f);
 
-    [Tooltip("Baseline 축거 (m) - 3D 섀시 모델 순정 기준 앞뒤 휠하우스 간격")]
-    public float baseWheelbase = 2.550f;
+    [Tooltip("Default Config 기준 섀시 로컬 스케일 (X, Y, Z) - 사용자 최적 검증값: (1, 1, 1.05)")]
+    public Vector3 defaultChassisLocalScale = new Vector3(1.0f, 1.0f, 1.05f);
+
+    [Tooltip("Baseline 윤거 (m) - Default vehicle_config.json 기준 (Veh_TrackF = 1.6m)")]
+    public float baseTrackWidth = 1.600f;
+
+    [Tooltip("Baseline 축거 (m) - Default vehicle_config.json 기준 (FrontAxleX 1.5m + RearAxleX 1.5m = 3.0m)")]
+    public float baseWheelbase = 3.000f;
 
     // 절대 변하지 않는 100% 퓨어 원본 스케일 및 위치
     private Vector3 _pureOriginalScale = Vector3.one;
@@ -63,6 +69,9 @@ public class VehicleController : MonoBehaviour
     {
         CachePureOriginalTransform();
         AttachSpoilerToChassis();
+
+        // 초기 시작 시 기본 최적 피팅 적용
+        ApplyChassisScale(baseTrackWidth, baseWheelbase);
 
         if (spawnPoint != null)
         {
@@ -136,7 +145,15 @@ public class VehicleController : MonoBehaviour
     }
 
     /// <summary>
-    /// Config 로드 시 추출된 윤거(currentTrackW)와 축거(currentWheelbase) 수치를 100% 직통 대입하여 3D 차체 스케일 변환
+    /// [차량 섀시 3D 피팅 알고리즘]
+    /// 런타임 JSON 핫스왑 시 로드된 윤거(currentTrackW)와 축거(currentWheelbase) 수치에 비례하여
+    /// 3D 섀시 메쉬의 로컬 위치(오프셋) 및 스케일을 정밀하게 자동 변환한다.
+    ///
+    /// [원리 수식]:
+    /// - Scale_X = defaultScale.x * (currentTrackW / baseTrackWidth)
+    /// - Scale_Y = defaultScale.y (서스펜션 차고 높이 유지)
+    /// - Scale_Z = defaultScale.z * (currentWheelbase / baseWheelbase)
+    /// - Pos_Z   = defaultPos.z   * (currentWheelbase / baseWheelbase) (휠하우스 중심점 보정)
     /// </summary>
     public void ApplyChassisScale(float currentTrackW, float currentWheelbase)
     {
@@ -144,17 +161,25 @@ public class VehicleController : MonoBehaviour
         if (chassisVisualTransform == null) return;
         if (baseTrackWidth <= 0 || baseWheelbase <= 0) return;
 
-        // [핵심 해결]: C++ DLL 지연 오차 없이 파라미터 직통 수치(2.6m/3.2m/4.2m)를 100% 스케일에 반영!
+        // 윤거 및 축거 변화 비율 계산
         float scaleXRatio = currentTrackW / baseTrackWidth;
         float scaleZRatio = currentWheelbase / baseWheelbase;
 
+        // 1. 3D 차체 스케일 인가 (기본 검증 스케일 Vector3(1.0, 1.0, 1.05) 기준 비례 확대/축소)
         Vector3 autoCalculatedScale = new Vector3(
-            _pureOriginalScale.x * scaleXRatio,
-            _pureOriginalScale.y,
-            _pureOriginalScale.z * scaleZRatio
+            defaultChassisLocalScale.x * scaleXRatio,
+            defaultChassisLocalScale.y,
+            defaultChassisLocalScale.z * scaleZRatio
         );
-
         chassisVisualTransform.localScale = autoCalculatedScale;
+
+        // 2. 3D 차체 로컬 위치 오프셋 인가 (기본 검증 위치 Vector3(0, 0.15, -0.05) 기준 휠하우스 센터 보정)
+        Vector3 autoCalculatedPos = new Vector3(
+            defaultChassisLocalPos.x * scaleXRatio,
+            defaultChassisLocalPos.y,
+            defaultChassisLocalPos.z * scaleZRatio
+        );
+        chassisVisualTransform.localPosition = autoCalculatedPos;
     }
 
     private void FixedUpdate()
